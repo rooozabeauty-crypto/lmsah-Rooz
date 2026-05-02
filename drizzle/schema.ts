@@ -99,3 +99,21 @@ export const userPreferences = mysqlTable("userPreferences", {
 
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = typeof userPreferences.$inferInsert;
+
+// Advertising Campaigns table
+export const campaigns = mysqlTable("campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  platform: varchar("platform", { length: 64 }).notNull(), // facebook, instagram, tiktok, google, etc
+  budget: int("budget").notNull(),
+  status: mysqlEnum("status", ["draft", "active", "paused", "completed", "failed"]).default("draft").notNull(),
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = typeof campaigns.$inferInsert;

@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, subscriptions, supportMessages, generatedLogos, hamsChatHistory, userPreferences, InsertSubscription, InsertSupportMessage, InsertGeneratedLogo, InsertHamsChatHistory, InsertUserPreferences } from "../drizzle/schema";
+import { InsertUser, users, subscriptions, supportMessages, generatedLogos, hamsChatHistory, userPreferences, campaigns, InsertSubscription, InsertSupportMessage, InsertGeneratedLogo, InsertHamsChatHistory, InsertUserPreferences, InsertCampaign } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -161,4 +161,23 @@ export async function getUserPreferences(userId: number) {
   if (!db) return undefined;
   const result = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Campaign queries
+export async function createCampaign(data: InsertCampaign) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(campaigns).values(data);
+}
+
+export async function getUserCampaigns(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(campaigns).where(eq(campaigns.userId, userId));
+}
+
+export async function updateCampaign(campaignId: number, data: Partial<InsertCampaign>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(campaigns).set(data).where(eq(campaigns.id, campaignId));
 }

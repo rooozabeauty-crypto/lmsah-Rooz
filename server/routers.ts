@@ -128,6 +128,48 @@ export const appRouter = router({
       return db.getUserPreferences(ctx.user.id);
     }),
   }),
+
+  // Campaigns router
+  campaigns: router({
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        description: z.string().optional(),
+        platform: z.string(),
+        budget: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const campaign = await db.createCampaign({
+          userId: ctx.user.id,
+          title: input.title,
+          description: input.description,
+          platform: input.platform,
+          budget: input.budget,
+          status: "draft",
+        });
+        return { success: true, campaign };
+      }),
+
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserCampaigns(ctx.user.id);
+    }),
+
+    update: protectedProcedure
+      .input(z.object({
+        campaignId: z.number(),
+        status: z.enum(["draft", "active", "paused", "completed", "failed"]).optional(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const campaign = await db.updateCampaign(input.campaignId, {
+          status: input.status,
+          title: input.title,
+          description: input.description,
+        });
+        return { success: true, campaign };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
