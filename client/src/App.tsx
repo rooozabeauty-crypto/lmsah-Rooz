@@ -5,12 +5,30 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import SEOPage from "./pages/SEOPage";
+import AdvertisingPage from "./pages/AdvertisingPage";
+import ContentDesignPage from "./pages/ContentDesignPage";
+import StrategyPage from "./pages/StrategyPage";
+import LogoGeneratorPage from "./pages/LogoGeneratorPage";
+import SocialMediaPage from "./pages/SocialMediaPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
+import SupportPage from "./pages/SupportPage";
+import HamsPage from "./pages/HamsPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/seo"} component={SEOPage} />
+      <Route path={"/advertising"} component={AdvertisingPage} />
+      <Route path={"/content-design"} component={ContentDesignPage} />
+      <Route path={"/strategy"} component={StrategyPage} />
+      <Route path={"/logo-generator"} component={LogoGeneratorPage} />
+      <Route path={"/social-media"} component={SocialMediaPage} />
+      <Route path={"/subscriptions"} component={SubscriptionPage} />
+      <Route path={"/support"} component={SupportPage} />
+      <Route path={"/hams"} component={HamsPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -27,7 +45,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="light"
+        defaultTheme="dark"
         // switchable
       >
         <TooltipProvider>
