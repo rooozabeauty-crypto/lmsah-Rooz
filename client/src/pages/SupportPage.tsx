@@ -2,20 +2,33 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function SupportPage() {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const sendMessageMutation = trpc.support.sendMessage.useMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !message.trim()) {
-      alert("يرجى ملء جميع الحقول");
+      toast.error("يرجى ملء جميع الحقول");
       return;
     }
-    alert("تم إرسال رسالتك! سنرد عليك قريباً");
-    setEmail("");
-    setMessage("");
+    try {
+      await sendMessageMutation.mutateAsync({
+        email,
+        subject: "رسالة من العميل",
+        message,
+      });
+      toast.success("تم إرسال رسالتك! سنرد عليك قريباً");
+      setEmail("");
+      setMessage("");
+    } catch (error) {
+      toast.error("حدث خطأ أثناء إرسال الرسالة");
+    }
   };
 
   return (
@@ -99,9 +112,10 @@ export default function SupportPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-pink-neon text-dark-midnight hover:bg-pink-neon/80 neon-glow py-6 text-lg"
+                disabled={sendMessageMutation.isPending}
+                className="w-full bg-pink-neon text-dark-midnight hover:bg-pink-neon/80 neon-glow py-6 text-lg disabled:opacity-50"
               >
-                إرسال الرسالة
+                {sendMessageMutation.isPending ? "جاري الإرسال..." : "إرسال الرسالة"}
               </Button>
             </form>
           </div>

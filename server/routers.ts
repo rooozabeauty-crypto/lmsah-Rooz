@@ -1,10 +1,11 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { z } from "zod";
+import * as db from "./db";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -17,12 +18,116 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  // Subscriptions router
+  subscriptions: router({
+    create: protectedProcedure
+      .input(z.object({
+        planId: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const subscription = await db.createSubscription({
+          userId: ctx.user.id,
+          planId: input.planId,
+          status: "active",
+        });
+        return { success: true, subscription };
+      }),
+
+    getActive: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserSubscription(ctx.user.id);
+    }),
+  }),
+
+  // Support messages router
+  support: router({
+    sendMessage: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        subject: z.string(),
+        message: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const message = await db.createSupportMessage({
+          email: input.email,
+          subject: input.subject,
+          message: input.message,
+          status: "new",
+        });
+        return { success: true, message };
+      }),
+
+    getMessages: protectedProcedure.query(async ({ ctx }) => {
+      return db.getSupportMessages(ctx.user.id);
+    }),
+  }),
+
+  // Hams chat router
+  hams: router({
+    saveMessage: protectedProcedure
+      .input(z.object({
+        userMessage: z.string(),
+        hamsResponse: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const message = await db.saveChatMessage({
+          userId: ctx.user.id,
+          userMessage: input.userMessage,
+          hamsResponse: input.hamsResponse,
+        });
+        return { success: true, message };
+      }),
+
+    getHistory: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserChatHistory(ctx.user.id);
+    }),
+  }),
+
+  // Logo generator router
+  logos: router({
+    generate: protectedProcedure
+      .input(z.object({
+        description: z.string(),
+        style: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const logo = await db.createGeneratedLogo({
+          userId: ctx.user.id,
+          description: input.description,
+          style: input.style,
+          imageUrl: "",
+          imageKey: "",
+          status: "generating",
+        });
+        return { success: true, logo };
+      }),
+
+    getMyLogos: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserLogos(ctx.user.id);
+    }),
+  }),
+
+  // User preferences router
+  preferences: router({
+    update: protectedProcedure
+      .input(z.object({
+        businessType: z.string().optional(),
+        targetAudience: z.string().optional(),
+        preferredLanguage: z.string().default("ar"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const preferences = await db.createOrUpdateUserPreferences({
+          userId: ctx.user.id,
+          businessType: input.businessType,
+          targetAudience: input.targetAudience,
+          preferredLanguage: input.preferredLanguage,
+        });
+        return { success: true, preferences };
+      }),
+
+    get: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserPreferences(ctx.user.id);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

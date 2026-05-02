@@ -2,6 +2,8 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Send, Sparkles, Heart } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 interface Message {
   id: string;
@@ -11,6 +13,7 @@ interface Message {
 }
 
 export default function HamsPage() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -22,6 +25,7 @@ export default function HamsPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const saveMessageMutation = trpc.hams.saveMessage.useMutation();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,7 +36,7 @@ export default function HamsPage() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !user) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -46,7 +50,7 @@ export default function HamsPage() {
     setIsLoading(true);
 
     // محاكاة رد من همس
-    setTimeout(() => {
+    setTimeout(async () => {
       const hamsResponses = [
         "رائع! أنا هنا لمساعدتك. هل تريد نصائح حول تحسين متجرك؟",
         "أفهم احتياجاتك. دعني أقترح عليك بعض الاستراتيجيات المناسبة.",
@@ -65,6 +69,16 @@ export default function HamsPage() {
 
       setMessages((prev) => [...prev, hamsMessage]);
       setIsLoading(false);
+
+      // حفظ الرسالة في قاعدة البيانات
+      try {
+        await saveMessageMutation.mutateAsync({
+          userMessage: input,
+          hamsResponse: randomResponse,
+        });
+      } catch (error) {
+        console.error("Failed to save message", error);
+      }
     }, 1000);
   };
 
@@ -146,7 +160,7 @@ export default function HamsPage() {
               />
               <Button
                 onClick={handleSendMessage}
-                disabled={isLoading || !input.trim()}
+                disabled={isLoading || !input.trim() || !user}
                 className="bg-pink-neon text-dark-midnight hover:bg-pink-neon/80 px-6"
               >
                 <Send className="w-5 h-5" />

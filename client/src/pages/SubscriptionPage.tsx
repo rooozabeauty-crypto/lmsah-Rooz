@@ -2,6 +2,9 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check, Zap } from "lucide-react";
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
 
 export default function SubscriptionPage() {
   const [selectedPlan, setSelectedPlan] = useState("basic");
@@ -74,8 +77,20 @@ export default function SubscriptionPage() {
     },
   ];
 
-  const handleSubscribe = (planId: string) => {
-    alert(`تم اختيار الباقة: ${planId}\nسيتم تحويلك إلى صفحة الدفع`);
+  const { user } = useAuth();
+  const createSubscriptionMutation = trpc.subscriptions.create.useMutation();
+
+  const handleSubscribe = async (planId: string) => {
+    if (!user) {
+      toast.error("يرجى تسجيل الدخول أولاً");
+      return;
+    }
+    try {
+      await createSubscriptionMutation.mutateAsync({ planId });
+      toast.success("تم اختيار الباقة بنجاح! سيتم تحويلك إلى صفحة الدفع");
+    } catch (error) {
+      toast.error("حدث خطأ أثناء اختيار الباقة");
+    }
   };
 
   return (
@@ -129,9 +144,10 @@ export default function SubscriptionPage() {
 
                 <Button
                   onClick={() => handleSubscribe(plan.id)}
-                  className={`w-full ${plan.buttonColor} text-dark-midnight hover:opacity-80 py-6 mb-6`}
+                  disabled={createSubscriptionMutation.isPending}
+                  className={`w-full ${plan.buttonColor} text-dark-midnight hover:opacity-80 py-6 mb-6 disabled:opacity-50`}
                 >
-                  اختر هذه الباقة
+                  {createSubscriptionMutation.isPending ? "جاري المعالجة..." : "اختر هذه الباقة"}
                 </Button>
 
                 <ul className="space-y-3">
