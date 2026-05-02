@@ -1,21 +1,89 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Zap, Video, Sparkles } from "lucide-react";
+import { Zap, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function AdvertisingPage() {
-  const tools = [
-    { name: "ShortFast", url: "https://shortfast.ai", icon: "⚡" },
-    { name: "Bunu AI", url: "https://bunu.ai", icon: "🎬" },
-    { name: "Vidio AI", url: "https://vidio.ai", icon: "🎥" },
-    { name: "InVideo AI", url: "https://invideo.io", icon: "📹" },
+  const { isAuthenticated } = useAuth();
+  const [isActivating, setIsActivating] = useState(false);
+
+  const handleActivateAdvertising = async () => {
+    if (!isAuthenticated) {
+      toast.error("يرجى تسجيل الدخول أولاً");
+      return;
+    }
+    setIsActivating(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast.success("✅ تم تفعيل خدمة الحملات الإعلانية بنجاح!");
+    } catch (error) {
+      toast.error("حدث خطأ أثناء التفعيل");
+    } finally {
+      setIsActivating(false);
+    }
+  };
+
+  const adTools = [
+    {
+      name: "ShortFast",
+      description: "إنشاء محتوى إعلاني قصير وجذاب",
+      url: "https://www.shortfast.ai",
+      color: "text-pink-neon",
+    },
+    {
+      name: "Bunu AI",
+      description: "أداة ذكية لتوليد نصوص إعلانية",
+      url: "https://www.bunu.ai",
+      color: "text-cyan-neon",
+    },
+    {
+      name: "Vidio AI",
+      description: "إنشاء فيديوهات إعلانية احترافية",
+      url: "https://www.vidio.ai",
+      color: "text-purple-neon",
+    },
+    {
+      name: "InVideo AI",
+      description: "منصة متكاملة لإنشاء الفيديوهات",
+      url: "https://www.invideo.io",
+      color: "text-blue-500",
+    },
+  ];
+
+  const campaignStrategies = [
+    {
+      title: "تحديد الجمهور المستهدف",
+      description: "اختيار الفئات التي تهتم بمنتجاتك",
+      tips: ["تحليل العملاء الحاليين", "دراسة السوق", "تحديد الديموغرافيات"],
+    },
+    {
+      title: "إنشاء محتوى جذاب",
+      description: "كتابة نصوص وإنشاء صور وفيديوهات تجذب الانتباه",
+      tips: ["استخدام قصص مؤثرة", "عروض خاصة", "محتوى فريد"],
+    },
+    {
+      title: "اختيار المنصات المناسبة",
+      description: "استخدام المنصات التي يتواجد فيها جمهورك",
+      tips: ["Facebook و Instagram", "TikTok و YouTube", "Google Ads"],
+    },
+    {
+      title: "تحسين الأداء",
+      description: "مراقبة النتائج وتحسين الحملات",
+      tips: ["تتبع المقاييس", "اختبار A/B", "تحسين الميزانية"],
+    },
   ];
 
   return (
     <div className="min-h-screen bg-dark-midnight text-foreground">
+      {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-dark-midnight/80 backdrop-blur-md border-b border-cyan-neon/30">
         <div className="container flex items-center justify-between py-4">
           <Link href="/">
-            <h1 className="text-2xl font-bold text-pink-neon cursor-pointer">لمسة رموز</h1>
+            <h1 className="text-2xl font-bold text-pink-neon cursor-pointer hover:text-pink-neon/80">
+              لمسة رموز
+            </h1>
           </Link>
           <Link href="/">
             <Button variant="outline" className="border-cyan-neon text-cyan-neon hover:bg-cyan-neon/10">
@@ -25,46 +93,105 @@ export default function AdvertisingPage() {
         </div>
       </nav>
 
-      <div className="pt-20 container py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-6">الحملات الإعلانية الذكية</h1>
-          <p className="text-xl text-muted-foreground mb-12">
-            أدوات متخصصة بالذكاء الاصطناعي لإنشاء حملات إعلانية فعالة وجذابة
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <div className="p-6 rounded-lg border border-pink-neon/30 bg-pink-neon/5">
-              <Zap className="w-8 h-8 text-pink-neon mb-4" />
-              <h3 className="text-xl font-bold text-pink-neon mb-2">إنشاء سريع</h3>
-              <p className="text-muted-foreground">أنشئ حملات احترافية في دقائق معدودة</p>
+      <div className="pt-20">
+        {/* Hero Section */}
+        <section className="py-16 bg-gradient-to-b from-pink-neon/10 to-dark-midnight border-b border-cyan-neon/20">
+          <div className="container">
+            <div className="flex items-center gap-4 mb-6">
+              <Zap className="w-12 h-12 text-pink-neon" />
+              <h1 className="text-5xl font-bold text-pink-neon">الحملات الإعلانية الذكية</h1>
             </div>
-            <div className="p-6 rounded-lg border border-cyan-neon/30 bg-cyan-neon/5">
-              <Video className="w-8 h-8 text-cyan-neon mb-4" />
-              <h3 className="text-xl font-bold text-pink-neon mb-2">محتوى فيديو</h3>
-              <p className="text-muted-foreground">فيديوهات احترافية بدون خبرة</p>
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl">
+              أدوات ذكاء اصطناعي متخصصة لإنشاء حملات إعلانية احترافية وفعالة تزيد من مبيعاتك
+            </p>
+
+            {/* Activation Button */}
+            <div className="flex gap-4 flex-wrap">
+              <Button
+                onClick={handleActivateAdvertising}
+                disabled={isActivating}
+                className="bg-pink-neon text-dark-midnight hover:bg-pink-neon/80 px-8 py-6 text-lg"
+              >
+                {isActivating ? "جاري التفعيل..." : "🚀 فعّل الحملات الآن"}
+              </Button>
+              <Link href="/hams">
+                <Button variant="outline" className="border-cyan-neon text-cyan-neon hover:bg-cyan-neon/10 px-8 py-6 text-lg">
+                  استشر همس
+                </Button>
+              </Link>
             </div>
           </div>
+        </section>
 
-          <div className="bg-card border border-cyan-neon/30 rounded-lg p-8 mb-12">
-            <h2 className="text-3xl font-bold text-pink-neon mb-8">أدوات الذكاء الاصطناعي</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tools.map((tool, idx) => (
-                <a key={idx} href={tool.url} target="_blank" rel="noopener noreferrer">
-                  <Button className="w-full bg-cyan-neon text-dark-midnight hover:bg-cyan-neon/80 py-6 text-lg justify-start gap-3">
-                    <span className="text-xl">{tool.icon}</span>
-                    {tool.name}
-                  </Button>
-                </a>
+        {/* Tools Section */}
+        <section className="py-16 border-b border-cyan-neon/20">
+          <div className="container">
+            <h2 className="text-4xl font-bold mb-12 text-cyan-neon">أدوات الإعلان المتقدمة</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {adTools.map((tool) => (
+                <div
+                  key={tool.name}
+                  className="p-6 rounded-lg border border-cyan-neon/30 bg-dark-midnight/50 hover:border-pink-neon/50 transition-all"
+                >
+                  <h3 className={`text-2xl font-bold mb-2 ${tool.color}`}>{tool.name}</h3>
+                  <p className="text-muted-foreground mb-6">{tool.description}</p>
+                  <a
+                    href={tool.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-cyan-neon hover:text-pink-neon transition"
+                  >
+                    زيارة الأداة
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
               ))}
             </div>
           </div>
+        </section>
 
-          <Link href="/subscriptions">
-            <Button className="w-full bg-pink-neon text-dark-midnight hover:bg-pink-neon/80 neon-glow py-6 text-lg">
-              اشترك الآن
+        {/* Strategies Section */}
+        <section className="py-16">
+          <div className="container">
+            <h2 className="text-4xl font-bold mb-12 text-purple-neon">استراتيجيات الحملات</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {campaignStrategies.map((strategy, idx) => (
+                <div
+                  key={idx}
+                  className="p-6 rounded-lg border border-purple-neon/30 bg-purple-neon/5 hover:border-pink-neon/50 transition-all"
+                >
+                  <h3 className="text-2xl font-bold mb-3 text-pink-neon">{strategy.title}</h3>
+                  <p className="text-muted-foreground mb-6">{strategy.description}</p>
+                  <div className="space-y-3">
+                    {strategy.tips.map((tip, tipIdx) => (
+                      <div key={tipIdx} className="flex items-start gap-3">
+                        <div className="w-2 h-2 rounded-full bg-cyan-neon mt-2 flex-shrink-0"></div>
+                        <p className="text-sm">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-16 bg-gradient-to-r from-pink-neon/10 to-cyan-neon/10 border-t border-cyan-neon/20">
+          <div className="container text-center">
+            <h2 className="text-4xl font-bold mb-6">ابدأ حملتك الإعلانية الآن</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              استخدم أدوات الذكاء الاصطناعي لإنشاء حملات احترافية وفعالة
+            </p>
+            <Button
+              onClick={handleActivateAdvertising}
+              disabled={isActivating}
+              className="bg-pink-neon text-dark-midnight hover:bg-pink-neon/80 px-8 py-6 text-lg"
+            >
+              {isActivating ? "جاري التفعيل..." : "فعّل الخدمة الآن"}
             </Button>
-          </Link>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );
